@@ -87,9 +87,6 @@ function updateObjects(
 const ConnectedObjects: React.VFC = () => {
   const targets = generateTargets();
   const connectors = generateConnectors(targets);
-
-  console.log(targets);
-
   const stage = useRef<Konva.Stage>(null);
 
   // 컴포넌트 시작할 때 선 그리기 초기화 용도
@@ -110,7 +107,6 @@ const ConnectedObjects: React.VFC = () => {
               x={target.x}
               y={target.y}
               radius={20 + Math.random() * 20}
-              shadowBlur={10}
               draggable={true}
               onDragMove={
                 (e) => {
