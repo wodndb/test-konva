@@ -36,13 +36,15 @@ const updateObjects = (layer: Konva.Layer) => {
   const arc = layer.findOne("#arc-1") as Konva.Arc;
   const text = layer.findOne("#text-1") as Konva.Text;
 
-  var rotation = CalculateRotation({x: pos1.x - pos2.x, y: pos2.y - pos1.y});
-  var angle = CalculateAngle(pos1, pos2, pos3);
+  const rotation = CalculateRotation({x: pos1.x - pos2.x, y: pos2.y - pos1.y});
+  const angle = CalculateAngle(pos1, pos2, pos3);
 
   line.setAttr("points", [pos1.x, pos1.y, pos2.x, pos2.y, pos3.x, pos3.y]);
+
   arc.setAttr("rotation", -rotation);
   arc.setAttr("angle", angle);
   arc.setPosition(pos2);
+
   text.setPosition({x: pos2.x + 40, y: pos2.y});
   text.setAttr("text", angle.toFixed(2).toString() + "°");
 
