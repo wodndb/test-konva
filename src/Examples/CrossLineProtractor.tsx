@@ -26,6 +26,7 @@ type CrossLineProtractorProps = {
   stageRef: React.RefObject<Konva.Stage>;
   x: number;
   y: number;
+  rotation: number;
   lineType: "cross" | "horizontal" | "vertical";
 };
 
@@ -33,18 +34,21 @@ const CrossLineProtractor: React.FC<CrossLineProtractorProps> = ({
   stageRef,
   x,
   y,
+  rotation,
   lineType,
 }) => {
-  const group = useRef<Konva.Group>(null);
+  const rotGroup = useRef<Konva.Group>(null);
+  const movGroup = useRef<Konva.Group>(null);
+  const text = useRef<Konva.Text>(null);
   const rotable = useRef<boolean>(false);
   const dragable = useRef<boolean>(false);
   const prevPointCoord = useRef<Vector2d>({ x: 0, y: 0 });
 
   const onTouchStart = () => {
     if (!stageRef) return;
-    if (stageRef.current !== null && group.current != null) {
+    if (stageRef.current !== null && movGroup.current != null) {
       const position = stageRef.current.getPointerPosition();
-      const groupPosition = group.current.getPosition();
+      const groupPosition = movGroup.current.getPosition();
       if (position !== null) {
         prevPointCoord.current = {
           x: position.x - groupPosition.x,
@@ -62,32 +66,36 @@ const CrossLineProtractor: React.FC<CrossLineProtractorProps> = ({
   const onTouchMove = () => {
     if (
       stageRef.current !== null &&
-      group.current !== null &&
+      rotGroup.current !== null &&
+      movGroup.current != null &&
       (rotable.current || dragable.current)
     ) {
       const position = stageRef.current.getPointerPosition();
-      const groupPosition = group.current.getPosition();
+      const groupPosition = movGroup.current.getPosition();
       if (position !== null) {
         const movePosition: Vector2d = {
           x: position.x - groupPosition.x,
           y: position.y - groupPosition.y,
         };
 
-        if (rotable.current) {
-          const rotation = CalculateAngle(
+        if (rotable.current && text.current !== null) {
+          var rot = rotGroup.current.rotation();
+          var vRot = CalculateAngle(
             prevPointCoord.current,
             { x: 0, y: 0 },
             movePosition
           );
-          group.current.rotate(rotation);
+          if (vRot > 180) vRot -= 360;
+          var rotation = rot + vRot;
+          if (rotation < -180) rotation += 360;
+          if (rotation > 180) rotation -= 360;
+
+          rotGroup.current.rotation(rotation);
+          text.current.setAttr('text', rotGroup.current.rotation().toFixed(2));
         }
 
         if (dragable.current) {
-          const translate: Vector2d = {
-            x: movePosition.x - prevPointCoord.current.x,
-            y: movePosition.y - prevPointCoord.current.y,
-          };
-          group.current.setPosition(position);
+          movGroup.current.setPosition(position);
         }
 
         prevPointCoord.current = movePosition;
@@ -104,130 +112,140 @@ const CrossLineProtractor: React.FC<CrossLineProtractorProps> = ({
   }, [stageRef]);
 
   return (
-    <Group ref={group} x={x} y={y}>
-      <Group
-        onMouseDown={() => {
-          if (dragable.current === false) {
-            rotable.current = true;
-            onTouchStart();
-          }
-        }}
-        onTouchStart={() => {
-          if (dragable.current === false) {
-            rotable.current = true;
-            onTouchStart();
-          }
-        }}
-      >
-        {lineType !== "horizontal" && (
-          <Group>
-            <Arrow
-              x={0}
-              y={0}
-              points={[0, 0, 0, 120]}
-              pointerLength={20}
-              pointerWidth={15}
-              fill="black"
-              stroke="black"
-              strokeWidth={2}
-            />
-            <Arrow
-              x={0}
-              y={0}
-              points={[0, 0, 0, -80]}
-              pointerLength={20}
-              pointerWidth={15}
-              fill="black"
-              stroke="black"
-              strokeWidth={2}
-            />
-          </Group>
-        )}
-        {lineType !== "vertical" && (
-          <Group>
-            <Arrow
-              x={0}
-              y={0}
-              points={[0, 0, 100, 0]}
-              pointerLength={20}
-              pointerWidth={15}
-              fill="black"
-              stroke="black"
-              strokeWidth={2}
-            />
-            <Arrow
-              x={0}
-              y={0}
-              points={[0, 0, -100, 0]}
-              pointerLength={20}
-              pointerWidth={15}
-              fill="black"
-              stroke="black"
-              strokeWidth={2}
-            />
-          </Group>
-        )}
+    <Group ref={movGroup} x={x} y={y} >
+      <Group ref={rotGroup} rotation={rotation}>
+        <Group
+          onMouseDown={() => {
+            if (dragable.current === false) {
+              rotable.current = true;
+              onTouchStart();
+            }
+          }}
+          onTouchStart={() => {
+            if (dragable.current === false) {
+              rotable.current = true;
+              onTouchStart();
+            }
+          }}
+        >
+          {lineType !== "horizontal" && (
+            <Group>
+              <Arrow
+                x={0}
+                y={0}
+                points={[0, 0, 0, 140]}
+                pointerLength={20}
+                pointerWidth={15}
+                fill="black"
+                stroke="black"
+                strokeWidth={2}
+              />
+              <Arrow
+                x={0}
+                y={0}
+                points={[0, 0, 0, -100]}
+                pointerLength={20}
+                pointerWidth={15}
+                fill="black"
+                stroke="black"
+                strokeWidth={2}
+              />
+            </Group>
+          )}
+          {lineType !== "vertical" && (
+            <Group>
+              <Arrow
+                x={0}
+                y={0}
+                points={[0, 0, 120, 0]}
+                pointerLength={20}
+                pointerWidth={15}
+                fill="black"
+                stroke="black"
+                strokeWidth={2}
+              />
+              <Arrow
+                x={0}
+                y={0}
+                points={[0, 0, -120, 0]}
+                pointerLength={20}
+                pointerWidth={15}
+                fill="black"
+                stroke="black"
+                strokeWidth={2}
+              />
+            </Group>
+          )}
+        </Group>
+        <Group
+          onMouseDown={() => {
+            if (rotable.current === false) {
+              dragable.current = true;
+              onTouchStart();
+            }
+          }}
+          onTouchStart={() => {
+            if (rotable.current === false) {
+              dragable.current = true;
+              onTouchStart();
+            }
+          }}
+        >
+          <Arc
+            x={0}
+            y={0}
+            angle={90}
+            innerRadius={0}
+            outerRadius={15}
+            fill="black"
+            stroke="black"
+            strokeWidth={2}
+            rotation={0}
+          />
+          <Arc
+            x={0}
+            y={0}
+            angle={90}
+            innerRadius={0}
+            outerRadius={15}
+            fill="black"
+            stroke="black"
+            strokeWidth={2}
+            rotation={180}
+          />
+          <Arc
+            x={0}
+            y={0}
+            angle={90}
+            innerRadius={0}
+            outerRadius={15}
+            fill="white"
+            stroke="black"
+            strokeWidth={2}
+            rotation={90}
+          />
+          <Arc
+            x={0}
+            y={0}
+            angle={90}
+            innerRadius={0}
+            outerRadius={15}
+            fill="white"
+            stroke="black"
+            strokeWidth={2}
+            rotation={270}
+          />
+        </Group>
       </Group>
-      <Group
-        onMouseDown={() => {
-          if (rotable.current === false) {
-            dragable.current = true;
-            onTouchStart();
-          }
-        }}
-        onTouchStart={() => {
-          if (rotable.current === false) {
-            dragable.current = true;
-            onTouchStart();
-          }
-        }}
-      >
-        <Arc
-          x={0}
-          y={0}
-          angle={90}
-          innerRadius={0}
-          outerRadius={15}
-          fill="black"
-          stroke="black"
-          strokeWidth={2}
-          rotation={0}
-        />
-        <Arc
-          x={0}
-          y={0}
-          angle={90}
-          innerRadius={0}
-          outerRadius={15}
-          fill="black"
-          stroke="black"
-          strokeWidth={2}
-          rotation={180}
-        />
-        <Arc
-          x={0}
-          y={0}
-          angle={90}
-          innerRadius={0}
-          outerRadius={15}
-          fill="white"
-          stroke="black"
-          strokeWidth={2}
-          rotation={90}
-        />
-        <Arc
-          x={0}
-          y={0}
-          angle={90}
-          innerRadius={0}
-          outerRadius={15}
-          fill="white"
-          stroke="black"
-          strokeWidth={2}
-          rotation={270}
-        />
-      </Group>
-      <Text x={40}text={"aaaa"}/>
+      <Text
+        ref={text}
+        x={30}
+        text={rotation.toFixed(2).toString()}
+        fontSize={20}
+        shadowEnabled={true}
+        shadowColor='white'
+        shadowBlur={4}
+        shadowOpacity={1} />
     </Group>
   );
 };
