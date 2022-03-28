@@ -99,7 +99,6 @@ const CrossLineProtractor: React.FC<CrossLineProtractorProps> = ({
         }
 
         prevPointCoord.current = movePosition;
-        console.log(prevPointCoord.current);
       }
     }
   };
