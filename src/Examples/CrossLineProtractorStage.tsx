@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { useRef } from "react";
-import { Image, Layer, Stage } from "react-konva";
+import { Group, Image, Layer, Stage } from "react-konva";
 import useImage from "use-image";
 import CrossLineProtractor from "./CrossLineProtractor";
 import imageurl from "../resources/skeleton.png";
@@ -10,7 +10,7 @@ const CrossLineProtractorStage: React.VFC = () => {
   const stage = useRef<Konva.Stage>(null);
   const layer = useRef<Konva.Layer>(null);
   const movable = useRef<boolean>(false);
-  const bgImage = useRef<Konva.Image>(null);
+  const group = useRef<Konva.Group>(null);
 
   return (
     <Stage
@@ -18,28 +18,22 @@ const CrossLineProtractorStage: React.VFC = () => {
       width={window.innerWidth}
       height={window.innerHeight}
       onMouseDown={() => {
-        layer.current?.scale({ x: 2, y: 2 });
         movable.current = true;
+        group.current?.show();
 
         const pos = stage.current?.getPointerPosition();
         if (pos === undefined || pos === null || !movable.current) return;
-        layer.current?.setPosition({ x: -pos.x, y: -pos.y });
 
-        stage.current?.toImage({callback:(image) =>{
-          if(bgImage.current !== null) {
-            bgImage.current.image(image)
-          }
-        }})
+        group.current?.setPosition(pos);
       }}
       onMouseUp={() => {
-        layer.current?.scale({ x: 1, y: 1 });
+        group.current?.hide();
         movable.current = false;
-        layer.current?.setPosition({ x: 0, y: 0 });
       }}
       onMouseMove={() => {
         var pos = stage.current?.getPointerPosition();
         if (pos === undefined || pos === null || !movable.current) return;
-        layer.current?.setPosition({ x: -pos.x, y: -pos.y });
+        group.current?.setPosition(pos);
       }}
     >
       <Layer ref={layer}>
@@ -65,6 +59,16 @@ const CrossLineProtractorStage: React.VFC = () => {
           y={600}
           rotation={0}
         />
+        <Group ref={group}
+          clip={{
+            x: 40,
+            y: 40,
+            width: 100,
+            height: 100,
+          }}
+        >
+          <Image image={image} scaleX={2} scaleY={2} />
+        </Group>
       </Layer>
     </Stage>
   );
