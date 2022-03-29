@@ -106,7 +106,7 @@ const CrossLineProtractor: React.FC<CrossLineProtractorProps> = ({
   useEffect(() => {
     if (stageRef.current !== null) {
       stageRef.current.on("mouseup touchend", onTouchEnd);
-      stageRef.current.on("mousemove ontouchmove", onTouchMove);
+      stageRef.current.on("mousemove touchmove", onTouchMove);
     }
   }, [stageRef]);
 
