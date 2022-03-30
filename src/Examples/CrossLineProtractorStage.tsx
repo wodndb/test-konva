@@ -5,6 +5,7 @@ import useImage from "use-image";
 import CrossLineProtractor from "./CrossLineProtractor";
 import imageurl from "../resources/skeleton.png";
 import PointerMagnifier from "./PointerMagnifier";
+import ObjectPositionMagnifier from "./ObjectPositionMagtifier";
 
 const CrossLineProtractorStage: React.VFC = () => {
   const [bgImage] = useImage(imageurl);
@@ -39,7 +40,7 @@ const CrossLineProtractorStage: React.VFC = () => {
           y={600}
           rotation={0}
         />
-        <PointerMagnifier bgImage={bgImage} scale={2} x={-50} y={-140} width={100} height={100}/>
+        <ObjectPositionMagnifier bgImage={bgImage} scale={2} x={-50} y={-140} width={100} height={100}/>
       </Layer>
     </Stage>
   );

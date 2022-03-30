@@ -1,8 +1,9 @@
 import Konva from "konva";
+import { KonvaEventObject } from "konva/lib/Node";
 import { Vector2d } from "konva/lib/types";
 import { useEffect, useRef } from "react";
-import { Arc, Arrow, Group, Text } from "react-konva";
-import { createSecureContext } from "tls";
+import { Arc, Group, Line, Text } from "react-konva";
+import { HideObjectPositionMagnifier, MoveObjectPositionMagnifier, ShowObjectPositionMagnifier } from "./ObjectPositionMagtifier";
 
 const CalculateRotation = (p: Vector2d) => {
   var rotation = (Math.atan2(p.y, p.x) * 180) / Math.PI;
@@ -43,6 +44,7 @@ const CrossLineProtractor: React.FC<CrossLineProtractorProps> = ({
   const rotable = useRef<boolean>(false);
   const dragable = useRef<boolean>(false);
   const prevPointCoord = useRef<Vector2d>({ x: 0, y: 0 });
+  const targetNode = useRef<Konva.Node>();
 
   const onTouchStart = () => {
     if (!stageRef) return;
@@ -61,6 +63,9 @@ const CrossLineProtractor: React.FC<CrossLineProtractorProps> = ({
   const onTouchEnd = () => {
     rotable.current = false;
     dragable.current = false;
+
+    const group = stageRef.current?.findOne("#ObjectPositionMagnifier") as Konva.Group;
+    HideObjectPositionMagnifier(group);
   };
 
   const onTouchMove = () => {
@@ -91,7 +96,7 @@ const CrossLineProtractor: React.FC<CrossLineProtractorProps> = ({
           if (rotation > 180) rotation -= 360;
 
           rotGroup.current.rotation(rotation);
-          text.current.setAttr('text', rotGroup.current.rotation().toFixed(2));
+          text.current.setAttr("text", rotGroup.current.rotation().toFixed(2));
         }
 
         if (dragable.current) {
@@ -99,9 +104,25 @@ const CrossLineProtractor: React.FC<CrossLineProtractorProps> = ({
         }
 
         prevPointCoord.current = movePosition;
+
+        const group = stageRef.current?.findOne("#ObjectPositionMagnifier") as Konva.Group;
+        if(group !== null && group !== undefined) {
+          const targetPos = targetNode.current?.getAbsolutePosition();
+          if(targetPos !== undefined && targetPos !== null)
+          MoveObjectPositionMagnifier(group, targetPos);
+        }
       }
     }
   };
+
+  const onTouchObjectStart = (evt: KonvaEventObject<MouseEvent | TouchEvent>) => {
+    targetNode.current = evt.target as Konva.Node;
+    const group = stageRef.current?.findOne("#ObjectPositionMagnifier") as Konva.Group;
+    if(group !== null && group !== undefined) {
+      console.log(targetNode.current.getAbsolutePosition());
+      ShowObjectPositionMagnifier(group, targetNode.current.getAbsolutePosition());
+    }
+  }
 
   useEffect(() => {
     if (stageRef.current !== null) {
@@ -111,8 +132,46 @@ const CrossLineProtractor: React.FC<CrossLineProtractorProps> = ({
   }, [stageRef]);
 
   return (
-    <Group ref={movGroup} x={x} y={y} >
+    <Group ref={movGroup} x={x} y={y}>
       <Group ref={rotGroup} rotation={rotation}>
+        <Group>
+          {lineType !== "horizontal" && (
+            <Group>
+              <Line
+                x={0}
+                y={0}
+                points={[0, 0, 0, 140]}
+                stroke="black"
+                strokeWidth={2}
+              />
+              <Line
+                x={0}
+                y={0}
+                points={[0, 0, 0, -100]}
+                stroke="black"
+                strokeWidth={2}
+              />
+            </Group>
+          )}
+          {lineType !== "vertical" && (
+            <Group>
+              <Line
+                x={0}
+                y={0}
+                points={[0, 0, 120, 0]}
+                stroke="black"
+                strokeWidth={2}
+              />
+              <Line
+                x={0}
+                y={0}
+                points={[0, 0, -120, 0]}
+                stroke="black"
+                strokeWidth={2}
+              />
+            </Group>
+          )}
+        </Group>
         <Group
           onMouseDown={() => {
             if (dragable.current === false) {
@@ -129,64 +188,70 @@ const CrossLineProtractor: React.FC<CrossLineProtractorProps> = ({
         >
           {lineType !== "horizontal" && (
             <Group>
-              <Arrow
+              <Line
+                points={[0, 0, 10, -30, -10, -30]}
                 x={0}
-                y={0}
-                points={[0, 0, 0, 140]}
-                pointerLength={20}
-                pointerWidth={15}
+                y={140}
+                closed={true}
                 fill="black"
                 stroke="black"
                 strokeWidth={2}
+                onMouseDown={onTouchObjectStart}
+                onTouchStart={onTouchObjectStart}
               />
-              <Arrow
+              <Line
+                points={[0, 0, 10, 30, -10, 30]}
                 x={0}
-                y={0}
-                points={[0, 0, 0, -100]}
-                pointerLength={20}
-                pointerWidth={15}
+                y={-100}
+                closed={true}
                 fill="black"
                 stroke="black"
                 strokeWidth={2}
+                onMouseDown={onTouchObjectStart}
+                onTouchStart={onTouchObjectStart}
               />
             </Group>
           )}
           {lineType !== "vertical" && (
             <Group>
-              <Arrow
-                x={0}
+              <Line
+                points={[0, 0, -30, 10, -30, -10]}
+                x={120}
                 y={0}
-                points={[0, 0, 120, 0]}
-                pointerLength={20}
-                pointerWidth={15}
+                closed={true}
                 fill="black"
                 stroke="black"
                 strokeWidth={2}
+                onMouseDown={onTouchObjectStart}
+                onTouchStart={onTouchObjectStart}
               />
-              <Arrow
-                x={0}
+              <Line
+                points={[0, 0, 30, 10, 30, -10]}
+                x={-120}
                 y={0}
-                points={[0, 0, -120, 0]}
-                pointerLength={20}
-                pointerWidth={15}
+                closed={true}
                 fill="black"
                 stroke="black"
                 strokeWidth={2}
+                onMouseDown={onTouchObjectStart}
+                onTouchStart={onTouchObjectStart}
               />
             </Group>
           )}
         </Group>
         <Group
-          onMouseDown={() => {
+          onMouseDown={(evt: KonvaEventObject<MouseEvent>) => {
             if (rotable.current === false) {
               dragable.current = true;
               onTouchStart();
+              onTouchObjectStart(evt);
             }
           }}
-          onTouchStart={() => {
+          onTouchStart={(evt: KonvaEventObject<TouchEvent>) => {
             if (rotable.current === false) {
               dragable.current = true;
               onTouchStart();
+              onTouchObjectStart(evt);
             }
           }}
         >
@@ -242,9 +307,10 @@ const CrossLineProtractor: React.FC<CrossLineProtractorProps> = ({
         text={rotation.toFixed(2).toString()}
         fontSize={20}
         shadowEnabled={true}
-        shadowColor='white'
+        shadowColor="white"
         shadowBlur={4}
-        shadowOpacity={1} />
+        shadowOpacity={1}
+      />
     </Group>
   );
 };
