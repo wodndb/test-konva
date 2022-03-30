@@ -4,7 +4,7 @@ import { Image, Layer, Stage } from "react-konva";
 import useImage from "use-image";
 import CrossLineProtractor from "./CrossLineProtractor";
 import imageurl from "../resources/skeleton.png";
-import Magnifier from "./Magnifier";
+import PointerMagnifier from "./PointerMagnifier";
 
 const CrossLineProtractorStage: React.VFC = () => {
   const [bgImage] = useImage(imageurl);
@@ -39,7 +39,7 @@ const CrossLineProtractorStage: React.VFC = () => {
           y={600}
           rotation={0}
         />
-        <Magnifier bgImage={bgImage} scale={2}/>
+        <PointerMagnifier bgImage={bgImage} scale={2} x={-50} y={-140} width={100} height={100}/>
       </Layer>
     </Stage>
   );
