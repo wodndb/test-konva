@@ -87,8 +87,9 @@ const CrossLineProtractorStage: React.VFC = () => {
           stroke="grey"
           strokeWidth={5}
         >
+          <Rect x={40} y={40} width={100} height={100} fill="white"/>
           <Image ref={imageRef} image={bgImage} scaleX={2} scaleY={2} />
-          <Rect x={40} y={40} width={100} height={100} fill={undefined} stroke="grey" strokeWidth={5}/>
+          <Rect x={40} y={40} width={100} height={100} stroke="grey" strokeWidth={5}/>
           <Line x={90} y={90} points={[-5, 0, 5, 0]} stroke="red"/>
           <Line x={90} y={90} points={[0, -5, 0, 5]} stroke="red"/>
         </Group>
