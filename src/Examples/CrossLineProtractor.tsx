@@ -28,6 +28,7 @@ type CrossLineProtractorProps = {
   x: number;
   y: number;
   rotation: number;
+  onChangeRotation: (rotation: number) => void;
   lineType: "cross" | "horizontal" | "vertical";
 };
 
@@ -36,6 +37,7 @@ const CrossLineProtractor: React.FC<CrossLineProtractorProps> = ({
   x,
   y,
   rotation,
+  onChangeRotation,
   lineType,
 }) => {
   const rotGroup = useRef<Konva.Group>(null);
@@ -97,6 +99,7 @@ const CrossLineProtractor: React.FC<CrossLineProtractorProps> = ({
 
           rotGroup.current.rotation(rotation);
           text.current.setAttr("text", rotGroup.current.rotation().toFixed(2));
+          onChangeRotation(rotation);
         }
 
         if (dragable.current) {

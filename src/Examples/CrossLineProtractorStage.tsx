@@ -25,6 +25,7 @@ const CrossLineProtractorStage: React.VFC = () => {
           x={200}
           y={200}
           rotation={0}
+          onChangeRotation={(rot:number) => {console.log(rot)}}
         />
         <CrossLineProtractor
           lineType={"cross"}
@@ -32,6 +33,7 @@ const CrossLineProtractorStage: React.VFC = () => {
           x={200}
           y={400}
           rotation={0}
+          onChangeRotation={(rot:number) => {console.log(rot)}}
         />
         <CrossLineProtractor
           lineType={"horizontal"}
@@ -39,6 +41,7 @@ const CrossLineProtractorStage: React.VFC = () => {
           x={200}
           y={600}
           rotation={0}
+          onChangeRotation={(rot:number) => {console.log(rot)}}
         />
         <ObjectPositionMagnifier bgImage={bgImage} scale={2} x={-50} y={-140} width={100} height={100}/>
       </Layer>
